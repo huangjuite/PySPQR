@@ -241,7 +241,7 @@ def cholmod_free_dense( A ):
 
 
 ## Solvers
-def rz(A, B, tolerance = None):
+def rz(A, B, tolerance = None, permc_spec='NATURAL'):
     getCTX=int(0)
     chol_A = scipy2cholmodsparse( A )
     chol_b = numpy2cholmoddense(  B )
@@ -250,10 +250,15 @@ def rz(A, B, tolerance = None):
     chol_E = ffi.new("SuiteSparse_long**")
     if tolerance is None:
         tolerance=0.
-        
+    
+    perm_map = {'NATURAL': lib.SPQR_ORDERING_NATURAL,
+                'COLAMD': lib.SPQR_ORDERING_COLAMD,
+                'AMD': lib.SPQR_ORDERING_AMD,
+                'METIS': lib.SPQR_ORDERING_METIS}
+    
     rank = lib.SuiteSparseQR_C(
         ## Input
-        lib.SPQR_ORDERING_DEFAULT,
+        perm_map[permc_spec],
         tolerance,
         A.shape[1],
         getCTX,
